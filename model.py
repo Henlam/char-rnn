@@ -93,5 +93,22 @@ class Model():
             ret += pred
             char = pred
         return ret
-
+    
+    def showProbs(self, sess, chars, vocab, text, verbose=False):
+        chars_and_probs = []
+        text = " "+text
+        state = self.cell.zero_state(1, tf.float32).eval()
+        for i in range(len(text)-2):
+            char = text[i]
+            nextChar = text[i+1]
+            x = np.zeros((1, 1))
+            x[0, 0] = vocab[char]
+            feed = {self.input_data: x, self.initial_state:state}
+            [probs,state] = sess.run([self.probs,self.final_state], feed)
+            p = probs[0]
+            chars_and_probs += [[nextChar,p[vocab[nextChar]] ]]
+            if verbose:
+                print "%s -> %f"%(nextChar,chars_and_probs[-1][1])
+        
+        return chars_and_probs
 
